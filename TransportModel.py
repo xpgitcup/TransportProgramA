@@ -51,6 +51,28 @@ class TransportModel:
         return
 
     def initTransportProject(self):
+
+        # 西北角法
+        def northwestCornerIteration(self):
+            print("西北角法初始调运方案：")
+            return
+
+        #最小元素法
+        def miniElementIteration(self):
+            print("最小元素法初始调运方案：")
+
+            return
+
+        initMethod = {
+            '1': northwestCornerIteration,
+            '2': miniElementIteration
+        }
+
+        methodIndex = input("请选择初始化方法(1--西北角, 2--最小元素法)：")
+        if (methodIndex==''):
+            methodIndex = '2'
+        initMethod[methodIndex](self)
+
         return
 
     def calculatePotential(self):
@@ -67,3 +89,5 @@ class TransportModel:
 
     def showResult(self):
         return
+
+
