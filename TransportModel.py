@@ -13,6 +13,7 @@ class TransportModel:
     transProject = []
     totalProduction = 0
     totalSale = 0
+    minCheckNumber = {}
 
     def initModel(self, dataLines):
         # 维度
@@ -222,6 +223,30 @@ class TransportModel:
         return
 
     def calculateCheckNumber(self):
+        for i in range(self.numberOfSources):
+            for j in range(self.numberOfSales):
+                if (not self.transProject[i][j]["isBase"]):
+                    self.transProject[i][j]["check"] = self.prices[i][j] - self.pu[i] - self.pv[j]
+        self.showTransProject()
+        return
+
+    def findMinCheckNumber(self):
+        clist = []
+        for i in range(self.numberOfSources):
+            for j in range(self.numberOfSales):
+                c = {}
+                if (not self.transProject[i][j]["isBase"]):
+                    c["i"] = i
+                    c["j"] = j
+                    c["v"] = self.transProject[i][j]["check"]
+                    clist.append(c)
+        mine = min(clist, key=lambda e:e["v"])
+        print("最小检验数：", mine)
+        self.minCheckNumber = mine
+        return
+
+    def findCloseLoop(self):
+        
         return
 
     def adjustTransportProject(self):

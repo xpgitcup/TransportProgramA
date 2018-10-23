@@ -10,6 +10,7 @@ try:
     model.initTransportProject()
     model.calculatePotential()
     model.calculateCheckNumber()
+    model.findMinCheckNumber()
     model.findCloseLoop()
     model.adjustTransportProject()
 
