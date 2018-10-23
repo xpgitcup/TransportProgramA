@@ -13,7 +13,7 @@ try:
     model.findMinCheckNumber()
     model.findCloseLoop()
     model.adjustTransportProject()
-
+    model.showResult()
     print("计算完成...")
 except IOError:
     print("文件不存在...")

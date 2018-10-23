@@ -14,6 +14,7 @@ class TransportModel:
     totalProduction = 0
     totalSale = 0
     minCheckNumber = {}
+    circleLoop = []
 
     def initModel(self, dataLines):
         # 维度
@@ -246,14 +247,88 @@ class TransportModel:
         return
 
     def findCloseLoop(self):
-        
+        closeLoop = []
+        front = 0
+        rear = 0
+        # 定义起始点
+        startPoint = {}
+        startPoint["i"] = self.minCheckNumber["i"]
+        startPoint["j"] = self.minCheckNumber["j"]
+        startPoint["pre"] = -1
+        startPoint["flag"] = 1
+        closeLoop.append(startPoint)
+        # 开始搜索
+        while (front <= rear):
+            x = closeLoop[front]["i"]
+            y = closeLoop[front]["j"]
+            if (closeLoop[front]["flag"] == 1):
+                i = x
+                for j in range(self.numberOfSales):
+                    if (self.transProject[i][j]["isBase"]):
+                        rear += 1
+                        p = {}
+                        p["i"] = i
+                        p["j"] = j
+                        p["pre"] = front
+                        p["flag"] = 0
+                        closeLoop.append(p)
+                        if (j == startPoint["j"]):
+                            print("找到了:", closeLoop)
+                            i = rear
+                            self.getCircleLoop(closeLoop, i)
+                            return
+                        # -- 是否需要登记这一个基变量点？
+            else:
+                j = y
+                for i in range(self.numberOfSources):
+                    if (self.transProject[i][j]["isBase"]):
+                        rear += 1
+                        q = {}
+                        q["i"] = i
+                        q["j"] = j
+                        q["pre"] = front
+                        q["flag"] = 1
+                        closeLoop.append(q)
+                        # 需要登记吗？
+            front += 1
+        print("到头了:", closeLoop)
         return
+
+    def getCircleLoop(self, closeLoop, i):
+        while (i != -1):
+            self.circleLoop.append(closeLoop[i])
+            i = closeLoop[i]["pre"]
+        print("闭回路：", self.circleLoop)
 
     def adjustTransportProject(self):
-        return
-
-    def findCloseLoop(self):
+        vlist =[]
+        for i in range(len(self.circleLoop)):
+            x = self.circleLoop[i]["i"]
+            y = self.circleLoop[i]["j"]
+            if (self.transProject[x][y]["isBase"]):
+                vlist.append(self.transProject[x][y]["value"])
+        minv = min(vlist)
+        # 开始调整
+        for i in range(len(self.circleLoop)):
+            x = self.circleLoop[i]["i"]
+            y = self.circleLoop[i]["j"]
+            ov = self.transProject[x][y]["value"]
+            if i % 2 == 0:
+                self.transProject[x][y]["value"] = ov - minv
+                if ov == minv:
+                    self.transProject[x][y]["isBase"] = False
+            else:
+                self.transProject[x][y]["value"] = ov + minv
+                self.transProject[x][y]["isBase"] = True
+        print("调整结束：")
+        self.showTransProject()
         return
 
     def showResult(self):
+        cost = 0
+        for i in range(self.numberOfSources):
+            for j in range(self.numberOfSales):
+                if (self.transProject[i][j]["isBase"]):
+                    cost += self.transProject[i][j]["value"] * self.prices[i][j]
+        print("最低运费：", cost)
         return
