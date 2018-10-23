@@ -6,12 +6,13 @@ class TransportModel:
     sales = []  # 销地销量
     saleNames = []
     prices = []  # 价格
+    pu = []
+    pv = []
     numberOfSources = 0
     numberOfSales = 0
     transProject = []
     totalProduction = 0
     totalSale = 0
-    leftProduction = 0
 
     def initModel(self, dataLines):
         # 维度
@@ -24,7 +25,7 @@ class TransportModel:
             if i == 0:  # 识别销地
                 for j in range(len(cols)):
                     if j > 0:
-                        if j < self.numberOfSales + 1:   # 销地名称
+                        if j < self.numberOfSales + 1:  # 销地名称
                             self.saleNames.append(cols[j])
                     else:
                         name = cols[j]  # 名字--问题的名称
@@ -36,14 +37,14 @@ class TransportModel:
                         if j == 0:
                             self.sourceNames.append(cols[j])
                         else:
-                            if j < self.numberOfSales + 1:   # 价格
+                            if j < self.numberOfSales + 1:  # 价格
                                 v.append(float(cols[j]))
                             else:
                                 self.sources.append(float(cols[j]))
                     self.prices.append(v)
                 else:
                     for j in range(len(cols)):
-                        if (j>0 and j < self.numberOfSales + 1):
+                        if (j > 0 and j < self.numberOfSales + 1):
                             self.sales.append(float(cols[j]))
 
         print("共有%d产地：" % (self.numberOfSources), self.sourceNames)
@@ -113,7 +114,7 @@ class TransportModel:
                 self.leftProduction -= transValue
             return
 
-        #最小元素法
+        # 最小元素法
         def miniElementIteration(self):
 
             print("最小元素法初始调运方案：")
@@ -123,7 +124,7 @@ class TransportModel:
             tempSales = self.sales.copy()
             leftProduction = self.totalProduction
 
-            while(leftProduction>0):
+            while (leftProduction > 0):
                 # 查找最小元素
                 plist = []
                 for i in range(self.numberOfSources):
@@ -161,8 +162,8 @@ class TransportModel:
                 # 同时划去一行 & 一列
                 if ((row and col) and (leftProduction > 0)):
                     print("同时满足：%d,%d" % (i, j))
-                    self.transProject[i][j-1]["value"] = 0
-                    self.transProject[i][j-1]["isBase"] = True
+                    self.transProject[i][j - 1]["value"] = 0
+                    self.transProject[i][j - 1]["isBase"] = True
             return
 
         initMethod = {
@@ -172,7 +173,7 @@ class TransportModel:
 
         initEmptyTransportProject(self)
         methodIndex = input("请选择初始化方法(1--西北角, 2--最小元素法)：")
-        if (methodIndex==''):
+        if (methodIndex == ''):
             methodIndex = '2'
         initMethod[methodIndex](self)
         self.showTransProject()
@@ -180,6 +181,24 @@ class TransportModel:
         return
 
     def calculatePotential(self):
+        finishedU = []
+        finishedV = []
+        for i in range(self.numberOfSources):
+            self.pu.append(0.0)
+        for i in range(self.numberOfSales):
+            self.pv.append(0.0)
+        plist = []
+        for i in range(self.numberOfSources):
+            for j in range(self.numberOfSales):
+                p = {}
+                if (self.transProject[i][j]["isBase"]):
+                    p["i"] = i
+                    p["j"] = j
+                    p["price"] = self.prices[i][j]
+                    plist.append(p)
+        plist.sort(key=lambda e: e["i"])
+        print("基变量：", plist)
+
         return
 
     def calculateCheckNumber(self):
@@ -193,5 +212,3 @@ class TransportModel:
 
     def showResult(self):
         return
-
-
