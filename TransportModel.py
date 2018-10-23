@@ -181,7 +181,7 @@ class TransportModel:
         return
 
     def calculatePotential(self):
-        finishedU = []
+        finishedU = [0]
         finishedV = []
         for i in range(self.numberOfSources):
             self.pu.append(0.0)
@@ -198,7 +198,27 @@ class TransportModel:
                     plist.append(p)
         plist.sort(key=lambda e: e["i"])
         print("基变量：", plist)
-
+        kk = 0
+        while ((len(finishedU) < self.numberOfSources) or (len(finishedV) < self.numberOfSales)):
+            kk += 1
+            for k in range(len(plist)):
+                i = plist[k]["i"]
+                j = plist[k]["j"]
+                if (i in finishedU):
+                    if not (j in finishedV):
+                        self.pv[j] = self.prices[i][j] - self.pu[i]
+                        finishedV.append(j)
+                else:
+                    if (j in finishedV):
+                        self.pu[i] = self.prices[i][j] - self.pv[j]
+                        finishedU.append(i)
+            print("迭代%d步..." % kk)
+            if (kk > 10):
+                print("死循环了...")
+                break
+        print("位势：")
+        print(self.pu)
+        print(self.pv)
         return
 
     def calculateCheckNumber(self):
