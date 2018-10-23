@@ -115,18 +115,30 @@ class TransportModel:
 
         #最小元素法
         def miniElementIteration(self):
+
             print("最小元素法初始调运方案：")
-            # 查找最小元素
+            finishedSource = []
+            finishedTarget = []
+            leftProduction = self.totalProduct
+
             tempProduction = self.sources.copy()
-            tempSalesVolume = self.sales.copy()
-            miniE = findMiniElement(price, finishedSource, finishedTarget)
-            stepIndex + +
+            tempSales = self.sales.copy()
+            # 查找最小元素
+            plist = []
+            for i in range(self.numberOfSources):
+                for j in range(self.numberOfSales):
+                    p = {}
+                    if (not ((i in finishedSource) or (j in finishedTarget))):
+                        p["i"] = i
+                        p["j"] = j
+                        p["value"] = self.prices[i][j]
+            miniE = min(plist, key=lambda e: e["value"])
+            print("最小元素：", miniE)
 
-            // 查找调运量 - -与横纵坐标相关
-
-            def transValue =
-
-            Math.min(tempProduction[miniE.i], tempSalesVolume[miniE.j])
+            # 查找调运量 - -与横纵坐标相关
+            i = miniE["i"]
+            j = miniE["j"]
+            transValue = min(tempProduction[i], tempSales[j])
 
             // 填写调运方案
             transProject[miniE.i][miniE.j] = transValue
