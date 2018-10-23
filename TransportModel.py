@@ -9,7 +9,7 @@ class TransportModel:
     numberOfSources = 0
     numberOfSales = 0
     transProject = []
-    totalProdtion = 0
+    totalProduction = 0
     totalSale = 0
     leftProduction = 0
 
@@ -52,9 +52,9 @@ class TransportModel:
         print("销量：", self.sales)
         print("运价表：")
         print(self.prices)
-        self.totalProdtion = sum(self.sources)
+        self.totalProduction = sum(self.sources)
         self.totalSale = sum(self.sales)
-        self.leftProduction = self.totalProdtion
+        self.leftProduction = self.totalProduction
         return
 
     def showTransProject(self):
@@ -119,51 +119,50 @@ class TransportModel:
             print("最小元素法初始调运方案：")
             finishedSource = []
             finishedTarget = []
-            leftProduction = self.totalProduct
-
             tempProduction = self.sources.copy()
             tempSales = self.sales.copy()
-            # 查找最小元素
-            plist = []
-            for i in range(self.numberOfSources):
-                for j in range(self.numberOfSales):
-                    p = {}
-                    if (not ((i in finishedSource) or (j in finishedTarget))):
-                        p["i"] = i
-                        p["j"] = j
-                        p["value"] = self.prices[i][j]
-            miniE = min(plist, key=lambda e: e["value"])
-            print("最小元素：", miniE)
+            leftProduction = self.totalProduction
 
-            # 查找调运量 - -与横纵坐标相关
-            i = miniE["i"]
-            j = miniE["j"]
-            transValue = min(tempProduction[i], tempSales[j])
+            while(leftProduction>0):
+                # 查找最小元素
+                plist = []
+                for i in range(self.numberOfSources):
+                    for j in range(self.numberOfSales):
+                        p = {}
+                        if (not ((i in finishedSource) or (j in finishedTarget))):
+                            p["i"] = i
+                            p["j"] = j
+                            p["value"] = self.prices[i][j]
+                            plist.append(p)
+                miniE = min(plist, key=lambda e: e["value"])
+                print("最小元素：", miniE)
 
-            // 填写调运方案
-            transProject[miniE.i][miniE.j] = transValue
-            transProjectFlag[miniE.i][miniE.j] = true
-            calculateTotalCost()
+                # 查找调运量 - -与横纵坐标相关
+                i = miniE["i"]
+                j = miniE["j"]
+                transValue = min(tempProduction[i], tempSales[j])
 
-            // 登记完成的行列
-            if (transValue == tempProduction[miniE.i]) {
-            finishedSource.add(miniE.i)
-            }
-            tempProduction[miniE.i] -= transValue
+                # 填写调运方案
+                self.transProject[i][j]["value"] = transValue
+                self.transProject[i][j]["isBase"] = True
 
-            if (transValue == tempSalesVolume[miniE.j]) {
-            finishedTarget.add(miniE.j)
-            }
-            tempSalesVolume[miniE.j] -= transValue
+                leftProduction -= transValue
+                tempProduction[i] -= transValue
+                tempSales[j] -= transValue
+                row = not (tempProduction[i] > 0)
+                col = not (tempSales[j] > 0)
 
-            if (tempProduction[miniE.i] == tempSalesVolume[miniE.j]) {
-            // 同时划去一行 & 一列
-            println("同时满足：${stepIndex}  ${miniE}")
-            }
+                # 登记完成的行列
+                if (row):
+                    finishedSource.append(i)
+                if (col):
+                    finishedTarget.append(j)
 
-            // 更新剩余产量
-            leftProduction -= transValue
-
+                # 同时划去一行 & 一列
+                if ((row and col) and (leftProduction > 0)):
+                    print("同时满足：%d,%d" % (i, j))
+                    self.transProject[i][j-1]["value"] = 0
+                    self.transProject[i][j-1]["isBase"] = True
             return
 
         initMethod = {
