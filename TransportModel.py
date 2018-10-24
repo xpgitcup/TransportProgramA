@@ -15,11 +15,14 @@ class TransportModel:
     totalSale = 0
     minCheckNumber = {}
     circleLoop = []
+    optFound = False  # 最优解标记
 
     def initModel(self, dataLines):
         # 维度
         self.numberOfSources = len(dataLines) - 2  # 产地 = 行数 - 1
         self.numberOfSales = len(dataLines[0].split()) - 2  # 销地 = 列数 - 2
+        # 最优解标志
+        self.optFound = False
         # 开始识别
         for i in range(len(dataLines)):
             line = dataLines[i]
@@ -58,6 +61,20 @@ class TransportModel:
         self.totalProduction = sum(self.sources)
         self.totalSale = sum(self.sales)
         self.leftProduction = self.totalProduction
+        return
+
+    def optimization(self):
+        k = 0
+        while not self.optFound:
+            k += 1
+            print("\n第%d次迭代..." % k)
+            self.calculatePotential()
+            self.calculateCheckNumber()
+            self.findMinCheckNumber()
+            if not self.optFound:
+                self.findCloseLoop()
+                self.adjustTransportProject()
+                self.showResult()
         return
 
     def showTransProject(self):
@@ -185,6 +202,8 @@ class TransportModel:
     def calculatePotential(self):
         finishedU = [0]
         finishedV = []
+        self.pu.clear()
+        self.pv.clear()
         for i in range(self.numberOfSources):
             self.pu.append(0.0)
         for i in range(self.numberOfSales):
@@ -214,13 +233,13 @@ class TransportModel:
                     if (j in finishedV):
                         self.pu[i] = self.prices[i][j] - self.pv[j]
                         finishedU.append(i)
-            print("迭代%d步..." % kk)
+            print("位势计算迭代%d步..." % kk)
             if (kk > 10):
                 print("死循环了...")
                 break
         print("位势：")
-        print(self.pu)
-        print(self.pv)
+        print("U:", self.pu)
+        print("V:", self.pv)
         return
 
     def calculateCheckNumber(self):
@@ -241,9 +260,12 @@ class TransportModel:
                     c["j"] = j
                     c["v"] = self.transProject[i][j]["check"]
                     clist.append(c)
-        mine = min(clist, key=lambda e:e["v"])
+        mine = min(clist, key=lambda e: e["v"])
         print("最小检验数：", mine)
         self.minCheckNumber = mine
+        self.optFound = (mine["v"] >= 0)
+        if (self.optFound):
+            print("获得最优解.")
         return
 
     def findCloseLoop(self):
@@ -295,19 +317,24 @@ class TransportModel:
         return
 
     def getCircleLoop(self, closeLoop, i):
+        self.circleLoop.clear()
         while (i != -1):
             self.circleLoop.append(closeLoop[i])
             i = closeLoop[i]["pre"]
         print("闭回路：", self.circleLoop)
 
     def adjustTransportProject(self):
-        vlist =[]
+        if self.optFound:
+            return
+
+        vlist = []
         for i in range(len(self.circleLoop)):
             x = self.circleLoop[i]["i"]
             y = self.circleLoop[i]["j"]
             if (self.transProject[x][y]["isBase"]):
                 vlist.append(self.transProject[x][y]["value"])
         minv = min(vlist)
+        print("调整量是：%f" % minv)
         # 开始调整
         for i in range(len(self.circleLoop)):
             x = self.circleLoop[i]["i"]
@@ -322,6 +349,13 @@ class TransportModel:
                 self.transProject[x][y]["isBase"] = True
         print("调整结束：")
         self.showTransProject()
+        # 检验数清空
+        for i in  range(self.numberOfSources):
+            for j in range(self.numberOfSales):
+                if (self.transProject[i][j].__contains__('check')):
+                    self.transProject[i][j].pop('check')
+        print("删除上次检验数的计算结果")
+        self.showTransProject()
         return
 
     def showResult(self):
@@ -330,5 +364,5 @@ class TransportModel:
             for j in range(self.numberOfSales):
                 if (self.transProject[i][j]["isBase"]):
                     cost += self.transProject[i][j]["value"] * self.prices[i][j]
-        print("最低运费：", cost)
+        print("当前运费：", cost)
         return
