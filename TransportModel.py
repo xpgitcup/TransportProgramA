@@ -331,7 +331,8 @@ class TransportModel:
         for i in range(len(self.circleLoop)):
             x = self.circleLoop[i]["i"]
             y = self.circleLoop[i]["j"]
-            if (self.transProject[x][y]["isBase"]):
+            # 最小调整量是关键--对角线上的两点，取最小。偶数点取最小
+            if (self.transProject[x][y]["isBase"] and (i % 2 == 0)):
                 vlist.append(self.transProject[x][y]["value"])
         minv = min(vlist)
         print("调整量是：%f" % minv)
