@@ -68,6 +68,9 @@ class TransportModel:
         while not self.optFound:
             k += 1
             print("\n第%d次迭代..." % k)
+            print("调运方案：")
+            self.displayTransProject()
+            print()
             self.calculatePotential()
             self.calculateCheckNumber()
             self.findMinCheckNumber()
@@ -77,9 +80,19 @@ class TransportModel:
                 self.showResult()
         return
 
+    def displayTransProject(self):
+        for e in self.transProject:
+            tmp = "["
+            for ee in e:
+                tmp += " %5.1f" % (ee["value"])
+            tmp += "]"
+            print(tmp)
+        return
+
     def showTransProject(self):
         for e in self.transProject:
             print(e)
+        return
 
     def initTransportProject(self):
 
@@ -322,6 +335,14 @@ class TransportModel:
             self.circleLoop.append(closeLoop[i])
             i = closeLoop[i]["pre"]
         print("闭回路：", self.circleLoop)
+        tmp = ""
+        for e in self.circleLoop:
+            if tmp == "":
+                tmp += "(%d,%d)" % (e["i"], e["j"])
+            else:
+                tmp += "->(%d,%d)" % (e["i"], e["j"])
+        print(tmp)
+        return
 
     def adjustTransportProject(self):
         if self.optFound:
@@ -350,13 +371,14 @@ class TransportModel:
                 self.transProject[x][y]["isBase"] = True
         print("调整结束：")
         self.showTransProject()
+        self.displayTransProject()
         # 检验数清空
         for i in  range(self.numberOfSources):
             for j in range(self.numberOfSales):
                 if (self.transProject[i][j].__contains__('check')):
                     self.transProject[i][j].pop('check')
         print("删除上次检验数的计算结果")
-        self.showTransProject()
+        #self.showTransProject()
         return
 
     def showResult(self):
